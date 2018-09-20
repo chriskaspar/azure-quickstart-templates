@@ -1,6 +1,19 @@
 #ChangeLog
 
 ```
+# v1.0.4 (2018-06-21)
+- Support deploy concourse automatically
+- Upgrade versions
+    - Upgrade Bosh version to 265.2.0, with manifest files changed
+    - Upgrade Concourse version to 3.12.0, with manifest files changed
+    - Upgrade Azure CPI version to 35.0.0, with manifest files changed
+
+# v1.0.3 (2017-01-15)
+- Updated bosh release, stemcells, azure cpi to latest version
+- Updated concourse release and garden-runc
+- Previous 1.0.2 no longer worked. Used azure-quickstart-templates/bosh setup as template for changes to scripts and manifests
+- Added randomized passwords in bosh.yml
+
 # v1.0.2 (2016-08-11)
 - Use CustomData to pass information to CustomScript
 

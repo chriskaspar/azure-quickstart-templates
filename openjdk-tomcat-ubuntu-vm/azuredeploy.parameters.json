@@ -9,16 +9,16 @@
       "value": "tomcat7"
     },
     "newStorageAccountName": {
-      "value": ""
+      "value": "GEN-UNIQUE-8"
     },
     "vmDnsName": {
-      "value": "javasample1dns"
+      "value": "GEN-UNIQUE-8"
     },
-    "adminUserName": {
-      "value": "javasample1"
+    "adminUsername": {
+      "value": "GEN-USER"
     },
     "adminPassword": {
-      "value": ""
+      "value": "GEN-PASSWORD"
     }
   }
 }

@@ -14,11 +14,11 @@
     "vmSize": {
       "value": "Standard_A2"
     },
-    "adminUserName": {
-      "value": "azureUser"
+    "adminUsername": {
+      "value": "GEN-UNIQUE"
     },
     "adminPassword": {
-      "value": "GEN-UNIQUE"
+      "value": "GEN-PASSWORD"
     },
     "virtualNetworkName": {
       "value": "azureVnet"

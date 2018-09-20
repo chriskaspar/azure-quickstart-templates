@@ -5,8 +5,8 @@
     "storageAccountNamePrefix": {
       "value": "GEN-UNIQUE-11"
     },
-    "adminUserName": {
-      "value": "adminUser"
+    "adminUsername": {
+      "value": "GEN-UNIQUE"
     },
     "adminPassword": {
       "value": "GEN-PASSWORD"

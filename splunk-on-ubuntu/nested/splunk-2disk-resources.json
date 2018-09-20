@@ -3,7 +3,8 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
     },
     "storageSettings": {
       "type": "object"
@@ -23,6 +24,10 @@
     "splunkAdminPassword": {
       "type": "securestring"
     },
+    "clusterSecret": {
+      "type": "securestring",
+      "defaultValue": "NA"
+    },
     "namespace": {
       "type": "string"
     },
@@ -35,23 +40,29 @@
     },
     "securityGroupName": {
       "type": "string"
+    },
+    "providerGuid": {
+      "type": "string"
     }
   },
   "variables": {
-    "templateAPIVersion": "2015-01-01",
-    "resourceAPIVersion": "2015-06-15",
     "singleQuote": "'",
     "vmName": "[concat(parameters('namespace'), '-vm')]",
     "nicName": "[concat(parameters('namespace'), '-nic')]",
     "publicIpName": "[parameters('machineSettings').publicIPName]",
     "clusterMasterIp": "[parameters('machineSettings').clusterMasterIp]",
-    "securityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]"
+    "securityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]",
+    "storageReferenceName": "[concat('Microsoft.Storage/storageAccounts/', parameters('storageSettings').name, parameters('storageSettings').map[0])]",
+    "storageApiVersion": "2016-01-01"
   },
   "resources": [
     {
-      "apiVersion": "[variables('resourceAPIVersion')]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
+      "tags": {
+        "provider": "[parameters('providerGuid')]"
+      },
       "location": "[parameters('location')]",
       "properties": {
         "networkSecurityGroup": {
@@ -75,9 +86,12 @@
       }
     },
     {
-      "apiVersion": "[variables('resourceAPIVersion')]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
+      "tags": {
+        "provider": "[parameters('providerGuid')]"
+      },
       "location": "[parameters('location')]",
       "plan": {
         "name": "[parameters('osSettings').imageReference.sku]",
@@ -95,7 +109,7 @@
           "vmSize": "[parameters('machineSettings').vmSize]"
         },
         "osProfile": {
-          "computername": "[variables('vmName')]",
+          "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -104,7 +118,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', parameters('storageSettings').name, parameters('storageSettings').map[0], '.blob.core.windows.net/vhds/', variables('vmName'), '-osdisk.vhd')]"
+              "uri": "[concat(reference(variables('storageReferenceName'), variables('storageApiVersion')).primaryEndpoints.blob, 'vhds/', variables('vmName'), '-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -115,7 +129,7 @@
               "diskSizeGB": "[parameters('machineSettings').diskSize]",
               "lun": 0,
               "vhd": {
-                "Uri": "[concat('http://', parameters('storageSettings').name, parameters('storageSettings').map[0], '.blob.core.windows.net/vhds/', variables('vmName'), '-datadisk1.vhd')]"
+                "uri": "[concat(reference(variables('storageReferenceName'), variables('storageApiVersion')).primaryEndpoints.blob, 'vhds/', variables('vmName'), '-datadisk1.vhd')]"
               },
               "caching": "ReadOnly",
               "createOption": "Empty"
@@ -125,7 +139,7 @@
               "diskSizeGB": "[parameters('machineSettings').diskSize]",
               "lun": 1,
               "vhd": {
-                "Uri": "[concat('http://', parameters('storageSettings').name, parameters('storageSettings').map[0], '.blob.core.windows.net/vhds/', variables('vmName'), '-datadisk2.vhd')]"
+                "uri": "[concat(reference(variables('storageReferenceName'), variables('storageApiVersion')).primaryEndpoints.blob, 'vhds/', variables('vmName'), '-datadisk2.vhd')]"
               },
               "caching": "ReadOnly",
               "createOption": "Empty"
@@ -142,7 +156,7 @@
       }
     },
     {
-      "apiVersion": "[variables('resourceAPIVersion')]",
+      "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "name": "[concat(variables('vmName'), '/node-setup')]",
       "location": "[parameters('location')]",
@@ -159,9 +173,23 @@
           "fileUris": "[parameters('osSettings').scripts]"
         },
         "protectedSettings": {
-          "commandToExecute": "[concat('bash node-setup.sh', ' -r ', parameters('splunkServerRole'), ' -c ', variables('clusterMasterIp'), ' -p ', variables('singleQuote'), parameters('splunkAdminPassword'), variables('singleQuote'))]"
+          "commandToExecute": "[concat('bash node-setup.sh', ' -r ', parameters('splunkServerRole'), ' -c ', variables('clusterMasterIp'), ' -p ', variables('singleQuote'), parameters('splunkAdminPassword'), variables('singleQuote'), ' -s ', variables('singleQuote'), parameters('clusterSecret'), variables('singleQuote'))]"
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "storageReferenceName": {
+      "type": "string",
+      "value": "[variables('storageReferenceName')]"
+    },
+    "storageApiVersion": {
+      "type": "string",
+      "value": "[variables('storageApiVersion')]"
+    },
+    "blobEndpoint": {
+      "type": "string",
+      "value": "[reference(variables('storageReferenceName'), variables('storageApiVersion')).primaryEndpoints.blob]"
+    }
+  }
 }

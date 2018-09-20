@@ -8,8 +8,8 @@
     "newStorageAccountName": {
       "value": "GEN-UNIQUE-8"
     },
-    "adminUserName": {
-      "value": "azureuser"
+    "adminUsername": {
+      "value": "GEN-UNIQUE"
     },
     "adminPassword": {
       "value": "GEN-PASSWORD"
